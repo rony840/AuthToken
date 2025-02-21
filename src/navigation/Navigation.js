@@ -5,6 +5,7 @@ import { Logout, Login, Signup, Profile, Goals, Apollo} from '../screens/Screens
 import { Image, SafeAreaView } from 'react-native';
 import Heading from '../components/Heading';
 import { useSelector } from 'react-redux';
+import GuestScreen from '../screens/GuestScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -24,6 +25,15 @@ const UserStack = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="LoggedIn" component={DrawerTab} />
+    </Stack.Navigator>
+  );
+};
+
+//user stack
+const GuestStack = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Guest" component={GuestScreen} />
     </Stack.Navigator>
   );
 };
@@ -117,7 +127,7 @@ function DrawerTab() {
       }}
     >
       <Drawer.Screen name="User" component={MyTabs} />
-      <Drawer.Screen name="Logout" component={Apollo} />
+      <Drawer.Screen name="Apollo" component={Apollo} />
       <Drawer.Screen name="Logout" component={Logout} />
     </Drawer.Navigator>
   );
@@ -126,8 +136,8 @@ function DrawerTab() {
 
 // App Navigation Component
 const AppNavigation = () => {
-  const { isAuthenticated } = useSelector((state) => state.user);
-  return (isAuthenticated? <UserStack/> : <AuthStack/>)
+  const { isAuthenticated,isGuest } = useSelector((state) => state.user);
+  return isGuest? <GuestStack/>:(isAuthenticated? <UserStack/> : <AuthStack/>)
 };
 
 export default AppNavigation;

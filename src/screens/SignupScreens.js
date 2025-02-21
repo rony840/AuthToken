@@ -29,10 +29,9 @@ const SignupScreen = () => {
         email,
         password,
       };
-      console.log('data in signup screen: ',userData)
       dispatch(signupUser(userData));
     } catch (error) {
-      console.log(error);
+      console.error(error);
       Alert.alert('Error', error.message || 'Something went wrong');
     }
   };

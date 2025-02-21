@@ -40,7 +40,6 @@ function* fetchUserSaga() {
 function* signupUserSaga(action) {
     try {
         yield put(startLoading());
-        console.log('data in saga: ',action.payload)
         const response = yield call(signup, action.payload.name, action.payload.email, action.payload.password);
         yield put(signupUserSuccess(response));
         

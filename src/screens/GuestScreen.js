@@ -8,8 +8,8 @@ import FormButton from '../components/FormButton';
 import ListItem from '../components/ListItem';
 import { addGoal, deleteGoal, editGoal, fetchGoals } from '../store/slices/goalSlice';
 import { goalsReducer, initialState } from '../store/reducers/goalsReducer'; // Import reducer
-
-const GoalsScreen = () => {
+import {disableGuest} from '../store/slices/userSlice';
+const GuestScreen = () => {
   const dispatch = useDispatch();
   const { goals } = useSelector((state) => state.goal);
   const [state, localDispatch] = useReducer(goalsReducer, initialState);
@@ -22,6 +22,10 @@ const GoalsScreen = () => {
   const handleEditGoal = () => {
     dispatch(editGoal({ id: state.editId, title: state.editTitle }));
     localDispatch({ type: 'CLOSE_EDIT_MODAL' });
+  };
+
+  const handleBack = () => {
+    dispatch(disableGuest());
   };
 
   const renderGoals = ({ item }) => (
@@ -39,7 +43,7 @@ const GoalsScreen = () => {
     <SafeAreaView style={styles.container}>
       <Background />
       <View style={styles.contentContainer}>
-        <TextDisplay txt={'Goals Screen'} />
+        <TextDisplay txt={'Guest Goals Screen'} />
         <FormButton title={'Add goal'} onPress={() => localDispatch({ type: 'OPEN_ADD_MODAL' })} />
         <FormButton title={'Show goals'} onPress={() => dispatch(fetchGoals())} />
         
@@ -72,6 +76,7 @@ const GoalsScreen = () => {
           initValue={state.editTitle}
           modalVisible={state.isEditModalOpen}
         />
+        <FormButton title={'Back to login'} onPress={handleBack}/>
       </View>
     </SafeAreaView>
   );
@@ -101,4 +106,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GoalsScreen;
+export default GuestScreen;

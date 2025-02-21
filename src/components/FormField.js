@@ -2,7 +2,7 @@ import {View,Text,StyleSheet, TextInput} from 'react-native';
 import { Colors } from '../assets/colors/Colors';
 
 const FormField = props => {
-    const {title,editable,onChange,placeholder,value1,error,secure} = props;
+    const {title,editable,onChange,placeholder,initValue,error,secure} = props;
     return(
         <View style={styles.container}>
             <View style={styles.txtCont}>
@@ -11,7 +11,7 @@ const FormField = props => {
             </View>
             
             <TextInput
-              value={value1}
+              value={initValue}
               autoCapitalize="none"
               autoCorrect={false}
               clearButtonMode="while-editing"

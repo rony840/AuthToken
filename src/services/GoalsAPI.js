@@ -3,11 +3,10 @@ import ClientAPI from './ClientAPI'; // Your axios instance
 
 export const addGoal = async (title) => {
   try {
-    console.log('add goal in userAPI: ', title);
     const response = await ClientAPI.post('/goals', { title });
-    console.log('add goal response: ',response)
+    const goalData = response.data.createdGoal;
     Alert.alert(response.data.message);
-    return response.data.message;
+    return goalData;
   } catch (error) {
     console.error('Failed to add the goal:', error);
     throw error;
@@ -17,7 +16,6 @@ export const addGoal = async (title) => {
 export const getGoals = async () => {
     try {
       const response = await ClientAPI.get('/goals');
-        console.log('getgoals response in userApi: ',response.data.data);
       return response.data.data;
     } catch (error) {
       console.error('Failed to fetch the goals:', error);
@@ -25,20 +23,24 @@ export const getGoals = async () => {
     }
   };
 
-export const editGoal = async ( title, goalId ) => {
+export const editGoal = async ( title, id ) => {
     try {
-      const response = await ClientAPI.put('/goals', { title, goalId });
-      return response.message;
+      const edit = await ClientAPI.put(`/goals/${id}`, { title });
+      Alert.alert(edit.data.message);
+      const updatedGoals = await ClientAPI.get('/goals');
+      return updatedGoals.data.data;
     } catch (error) {
       console.error('edit goal failed:', error);
       throw error;
     }
   };
 
-export const deleteGoal = async (goalId) => {
+export const deleteGoal = async (id) => {
     try {
-      const response = await ClientAPI.delete('/goals', { goalId });
-      return response.message;
+      const del = await ClientAPI.delete(`/goals/${id}`);
+      Alert.alert(del.data.message);
+      const updatedGoals = await ClientAPI.get('/goals');
+      return updatedGoals.data.data;
     } catch (error) {
         console.error('delete goal failed:', error);
         throw error;

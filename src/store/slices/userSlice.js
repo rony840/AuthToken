@@ -7,6 +7,7 @@ const initialState = {
     isAuthenticated: false,
     signedup: false,
     loggedin: false,
+    isGuest: false,
     loading: false,  // Add a loading state to handle async operations
     error: null,     // Optional: Add an error state for error handling
 };
@@ -63,6 +64,12 @@ const userSlice = createSlice({
             state.loading = false;
             state.error = action.payload;
         },
+        enableGuest: (state) => {
+            state.isGuest = true;
+        },
+        disableGuest: (state) => {
+            state.isGuest = false;
+        },
         startLoading: (state) => {
             state.loading = true; // Set loading to true when starting async operations
         },
@@ -88,6 +95,8 @@ export const {
     logoutUser,
     logoutUserSuccess,
     logoutUserFailed,
+    enableGuest,
+    disableGuest,
     startLoading, 
     stopLoading, 
     setError 
