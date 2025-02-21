@@ -7,13 +7,20 @@
 
 import React from 'react';
 import { SafeAreaView, StyleSheet } from 'react-native';
-import Login from './src/screens/Login';
+import { NavigationContainer } from '@react-navigation/native';
+import AppNavigation from './src/navigation/Navigation';
+import { Provider } from 'react-redux';
+import { store } from './src/store/store';
 
 function App(): React.JSX.Element {
   
   return (
     <SafeAreaView style={styles.container}>
-     <Login/>
+      <Provider store={store}>
+      <NavigationContainer>
+      <AppNavigation/>
+       </NavigationContainer>
+      </Provider>
     </SafeAreaView>
   );
 }
