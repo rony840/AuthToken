@@ -25,10 +25,9 @@ export const getGoals = async () => {
 
 export const editGoal = async ( title, id ) => {
     try {
-      const edit = await ClientAPI.put(`/goals/${id}`, { title });
-      Alert.alert(edit.data.message);
-      const updatedGoals = await ClientAPI.get('/goals');
-      return updatedGoals.data.data;
+      const editedGoal = await ClientAPI.put(`/goals/${id}`, { title });
+      Alert.alert(editedGoal.data.message);
+      return editedGoal.data.updatedGoal;
     } catch (error) {
       console.error('edit goal failed:', error);
       throw error;
@@ -39,8 +38,7 @@ export const deleteGoal = async (id) => {
     try {
       const del = await ClientAPI.delete(`/goals/${id}`);
       Alert.alert(del.data.message);
-      const updatedGoals = await ClientAPI.get('/goals');
-      return updatedGoals.data.data;
+      return del.data.deletedGoal;
     } catch (error) {
         console.error('delete goal failed:', error);
         throw error;

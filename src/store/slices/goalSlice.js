@@ -27,7 +27,14 @@ const goalSlice = createSlice({
             state.error = action.payload;
         },
         editGoalSuccess: (state, action) => {
-            state.goals = action.payload;
+            console.log('in edit slice success:',action.payload)
+            const index = state.goals.findIndex(goal => goal._id === action.payload._id);
+            if (index !== -1) {
+                console.log('after editing goal state:',state.goals[index])
+                state.goals[index].title = action.payload.title;
+                state.goals[index].updatedAt = action.payload.updatedAt;
+            }
+            console.log('after editing goal state:',state.goals[index])
         },
         deleteGoal: (state, action) => {
             state.goal = action.payload;
@@ -36,7 +43,8 @@ const goalSlice = createSlice({
             state.error = action.payload;
         },
         deleteGoalSuccess: (state, action) => {
-            state.goals = action.payload;
+            console.log('in delete slice success:',action.payload)
+            state.goals = state.goals.filter(goal => goal._id !== action.payload._id);
         },
         fetchGoals: (state, action) => {
             state.goal = action.payload;
