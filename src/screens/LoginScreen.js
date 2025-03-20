@@ -6,12 +6,13 @@ import { Formik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux'; 
 import { enableGuest, loginUser } from '../store/slices/userSlice';
 import { LoginSchema } from '../schemas/LoginSchema';
+import Config from 'react-native-config';
 
 const LoginScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch(); 
   const { loading, error, user } = useSelector((state) => state.user);
-  
+  console.log('EnvSelected: ',Config.ENV)
   
   const handleLogin = (values) => {
     dispatch(loginUser(values));
@@ -32,10 +33,11 @@ const LoginScreen = () => {
       <View style={styles.contentContainer}>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <View style={styles.headerContainer}>
-            <Image 
+            <Image
               source={require('../assets/icons/restfulapi.png')} 
               style={styles.logo}
             />
+            <Text style={styles.envText}>Environment: {Config.ENV}</Text>
             <Text style={styles.companyName}>Restful API</Text>
             <Text style={styles.heading}>Login</Text>
           </View>
@@ -79,11 +81,10 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
   },
   headerContainer: {
     position: 'absolute',
-    top: 100,
+    top: 30,
     left: 0,
     right: 0,
     bottom: 0,
@@ -91,6 +92,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     marginBottom: 120,
   },
+  envText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
+  },  
   logo: {
     width: 150,
     height: 150,
@@ -120,7 +127,7 @@ const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
     marginTop: '100%',
-    justifyContent: 'center',
+    
     alignItems: 'center',
   },
   scrollViewContent: {
