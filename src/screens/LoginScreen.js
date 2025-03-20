@@ -1,21 +1,37 @@
-import { StyleSheet, SafeAreaView, View, ScrollView, Image, Text } from 'react-native';
+import { StyleSheet, SafeAreaView, View, ScrollView, Image, Text, Alert } from 'react-native';
 import { FormButton, FormField, Background, FormFooter } from '../components/Components';
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from '../assets/colors/Colors';
 import { Formik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux'; 
-import { enableGuest, loginUser } from '../store/slices/userSlice';
+import { enableGuest, loginUser, loginUserFailed, loginUserSuccess } from '../store/slices/userSlice';
 import { LoginSchema } from '../schemas/LoginSchema';
 import Config from 'react-native-config';
+import { useLoginMutation } from '../services/rtkQuery/userAPISlice';
 
 const LoginScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch(); 
   const { loading, error, user } = useSelector((state) => state.user);
+  const [login, { isLoading, error: rtkError }] = useLoginMutation();
   console.log('EnvSelected: ',Config.ENV)
   
-  const handleLogin = (values) => {
-    dispatch(loginUser(values));
+  const handleLogin = async (values) => {
+    if (Config.ENV === 'Staging') {
+      console.log('attempting login using RTK query')
+      try {
+        const result = await login(values).unwrap();
+        console.log('Login successful:', result.message);
+        Alert.alert('Logged In',result.message)
+        dispatch(loginUserSuccess(result.message))
+      } catch (error) {
+        console.error('RTK Query Login Error:', error.data.message);
+        dispatch(loginUserFailed(error.data.message))
+      }
+    } else if(Config.ENV === 'Development'){
+      console.log('attempting login using redux-saga with axios')
+      dispatch(loginUser(values));
+    }
   };
 
   const gotoGuest = () => {
@@ -63,9 +79,9 @@ const LoginScreen = () => {
                   initValue={values.password}
                   error={errors.password}
                 />
-                {/* Show error message from Redux state */}
-                {error && <Text style={styles.errorText}>{error}</Text>}
-                <FormButton title={'Login'} onPress={handleSubmit} disabled={loading} />
+                
+                {(error || rtkError) && <Text style={styles.errorText}>{error || rtkError?.data?.message}</Text>}
+                <FormButton title={'Login'} onPress={handleSubmit} disabled={loading || isLoading} />
                 <FormButton title={'Guest User'} onPress={gotoGuest} disabled={loading} />
               </View>
             )}

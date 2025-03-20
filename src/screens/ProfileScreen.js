@@ -2,14 +2,37 @@ import { StyleSheet, SafeAreaView, View} from 'react-native';
 import { Background, FormButton } from '../components/Components';
 import { useDispatch, useSelector } from 'react-redux';
 import TextDisplay from '../components/TextDisplay';
-import { fetchUser } from '../store/slices/userSlice';
+import { fetchUser, fetchUserFailed, fetchUserSuccess } from '../store/slices/userSlice';
+import Config from 'react-native-config';
+import { useLazyGetUserInfoQuery } from '../services/rtkQuery/userAPISlice';
 
 const Profile = () => {
   const dispatch = useDispatch(); 
   const {currentUser} = useSelector((state) => state.user);
+  const [triggerGetUserInfo, { data, isLoading, isFetching, status, error }] = useLazyGetUserInfoQuery();
   
-  const fetchUserInfo = () => {
-    dispatch(fetchUser())
+  const fetchUserInfo = async() => {
+    if (Config.ENV === 'Staging') {
+          try {
+            console.log('attempting fetch user info using RTK query')
+            console.log(data)
+            await triggerGetUserInfo();
+            if(data?.data){
+              dispatch(fetchUserSuccess(data.data))
+            }
+            console.log('Fetching Status:', { isLoading, isFetching, status });
+            if (!isFetching) {
+              console.log('Using Cached Data:', data.data);
+            }
+            
+          } catch (error) {
+            console.error('RTK Query user info fetch Error:', error.data.message);
+            dispatch(fetchUserFailed(error?.data?.message))
+          }
+        } else if(Config.ENV === 'Development'){
+          console.log('attempting login using redux-saga with axios')
+          dispatch(fetchUser());
+        }
   }
   return (
     <SafeAreaView style={styles.container}>
