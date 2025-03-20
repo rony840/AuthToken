@@ -159,22 +159,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   contentContainer: {
+    position:'absolute',
+    top:0,
+    left:0,
     flex: 1,
-    justifyContent: 'center',
     paddingHorizontal: '5%',
     paddingVertical: '5%',
   },
   input: {
     height: 40,
     borderWidth: 1,
+    color:'white',
     borderColor: '#ccc',
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
   },
   bodyContainer: {
-    flex: 1,
-    marginTop: 20,
+    height:'45%',
   },
   flatListContainer: {
     paddingBottom: 20,

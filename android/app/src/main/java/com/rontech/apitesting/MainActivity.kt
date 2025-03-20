@@ -1,4 +1,4 @@
-package com.authtoken
+package com.rontech.apitesting
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
