@@ -25,12 +25,16 @@ const LoginScreen = () => {
         Alert.alert('Logged In',result.message)
         dispatch(loginUserSuccess(result.message))
       } catch (error) {
-        console.error('RTK Query Login Error:', error.data.message);
-        dispatch(loginUserFailed(error.data.message))
+        console.error('RTK Query Login Error:', error.error);
+        dispatch(loginUserFailed(error.error))
       }
     } else if(Config.ENV === 'Development'){
-      console.log('attempting login using redux-saga with axios')
-      dispatch(loginUser(values));
+      try{
+        console.log('attempting login using redux-saga with axios')
+        dispatch(loginUser(values));
+      }catch(error){
+        console.error('Redux-saga with axios login Error:', error.data.message);
+      }
     }
   };
 

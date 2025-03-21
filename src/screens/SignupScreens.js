@@ -5,14 +5,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Formik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormButton, FormField, Background, FormFooter, Heading } from '../components/Components';
-import { signupUser } from '../store/slices/userSlice';
+import { signupUser, signupUserFailed, signupUserSuccess } from '../store/slices/userSlice';
 import { SignupSchema } from '../schemas/SignupSchema';
+import Config from 'react-native-config';
+import { useSignupMutation } from '../services/rtkQuery/userAPISlice';
 
 const SignupScreen = () => {
   const dispatch = useDispatch(); 
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { signedup } = useSelector((state) => state.user);
+  const [signup, { isLoading, error: rtkError }] = useSignupMutation();
 
   useEffect(() => {
       if (signedup) {
@@ -21,19 +24,32 @@ const SignupScreen = () => {
       }
     }, [signedup, navigation]);
 
-  const handlerSignupUser = (values) => {
-    try {
+  const handlerSignupUser = async (values) => {
       const { name, email, password } = values;
       const userData = {
         name,
         email,
         password,
       };
-      dispatch(signupUser(userData));
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', error.message || 'Something went wrong');
-    }
+      if (Config.ENV === 'Staging') {
+          console.log('attempting signup using RTK query')
+          try {
+            const result = await signup(userData).unwrap();
+            console.log('Signup Successfull:', result.message);
+            Alert.alert('Signed Up!',result.message)
+            dispatch(signupUserSuccess(result.message))
+          } catch (error) {
+            console.error('RTK Query Signup Error:', error.data.message);
+            dispatch(signupUserFailed(error.data.message))
+          }
+        } else if(Config.ENV === 'Development'){
+          try{
+            console.log('attempting signup using redux-saga with axios')
+            dispatch(signupUser(userData));
+          }catch(error){
+            console.error('Redux-saga with axios Signup Error:', error.data.message);
+          }
+        }
   };
 
   const initialValues = {

@@ -1,9 +1,10 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQuery } from './rtkClient';
 import KeychainHelper from '../../helpers/TokenHelper';
 
 export const userAPISlice = createApi({
   reducerPath: 'userAPI',
+  keepUnusedDataFor: 1, // keep Cache for 5 seconds
   baseQuery,
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -22,8 +23,10 @@ export const userAPISlice = createApi({
       },
     }),
     getUserInfo: builder.query({
-      query: () => '/users',
-      keepUnusedDataFor: 20, // keep Cache for 20 seconds
+      query: () => ({
+        url: '/users',
+        method: 'GET',
+      }),
     }),
     signup: builder.mutation({
       query: ({ name, email, password }) => ({
@@ -43,7 +46,6 @@ export const userAPISlice = createApi({
 
 export const {
   useLoginMutation,
-  useGetUserInfoQuery,
   useLazyGetUserInfoQuery,
   useSignupMutation,
   useLogoutMutation,

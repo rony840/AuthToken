@@ -1,22 +1,36 @@
-import { StyleSheet, SafeAreaView, View } from 'react-native';
+import { StyleSheet, SafeAreaView, View, Alert } from 'react-native';
 import { Background, TextDisplay, FormButton } from '../components/Components';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
-import { logoutUser } from '../store/slices/userSlice';
+import { logoutUser, logoutUserFailed, logoutUserSuccess } from '../store/slices/userSlice';
+import Config from 'react-native-config';
+import { useLogoutMutation } from '../services/rtkQuery/userAPISlice';
 
 const LogoutScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const [logout, { isLoading, error: rtkError }] = useLogoutMutation();
 
-  // Function to handle logout
   const handleLogout = async () => {
-    try {
-
-      dispatch(logoutUser());
-
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
+    if (Config.ENV === 'Staging') {
+        console.log('attempting login using RTK query')
+        try {
+          const result = await logout();
+          console.log('Logout successful:', result.data);
+          Alert.alert('Logged Out!',result.data)
+          dispatch(logoutUserSuccess(result))
+        } catch (error) {
+          console.error('RTK Query Logout Error:', error.data.message);
+          dispatch(logoutUserFailed(error.data.message))
+        }
+      } else if(Config.ENV === 'Development'){
+        try{
+          console.log('attempting logout using redux-saga with axios')
+          dispatch(logoutUser());
+        }catch(error){
+          console.error('Redux-saga with axios logout Error:', error.data.message);
+        }
+      }
   };
 
   return (
