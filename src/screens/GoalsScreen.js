@@ -6,23 +6,108 @@ import Background from '../components/Background';
 import ModalForm from '../components/ModalForm';
 import FormButton from '../components/FormButton';
 import ListItem from '../components/ListItem';
-import { addGoal, deleteGoal, editGoal, fetchGoals } from '../store/slices/goalSlice';
+import { addGoal, addGoalFailed, addGoalSuccess, deleteGoal, deleteGoalFailed, deleteGoalSuccess, editGoal, editGoalFailed, editGoalSuccess, fetchGoals, fetchGoalsFailed, fetchGoalsSuccess } from '../store/slices/goalSlice';
 import { goalsReducer, initialState } from '../store/reducers/goalsReducer'; // Import reducer
+import Config from 'react-native-config';
+import { useAddGoalMutation, useLazyGetGoalsQuery, useEditGoalMutation, useDeleteGoalMutation } from '../services/rtkQuery/goalsAPISlice';
 
 const GoalsScreen = () => {
   const dispatch = useDispatch();
   const { goals } = useSelector((state) => state.goal);
   const [state, localDispatch] = useReducer(goalsReducer, initialState);
+  const [rtkAddGoal, { error }] = useAddGoalMutation();
+  const [rtkGetGoal, { isLoading }] = useLazyGetGoalsQuery();
+  const [rtkEditGoal] = useEditGoalMutation();
+  const [rtkDeleteGoal] = useDeleteGoalMutation();
 
-  const handleAddGoal = () => {
-    dispatch(addGoal(state.goalInput));
-    localDispatch({ type: 'CLOSE_ADD_MODAL' });
+  const handleAddGoal = async () => {
+    if (Config.ENV === 'Staging') {
+      console.log('attempting add goal using RTK query')
+      try {
+        const result = await rtkAddGoal(state.goalInput).unwrap();
+        console.log('add goal success:', result);
+        dispatch(addGoalSuccess(result.createdGoal))
+        localDispatch({ type: 'CLOSE_ADD_MODAL' });
+      } catch (error){
+        console.error('RTK Query add goal Error:', error.message);
+        dispatch(addGoalFailed(error.message))
+      }
+    } else if(Config.ENV === 'Development'){
+      try{
+        console.log('attempting add goal using redux-saga with axios')
+        dispatch(addGoal(state.goalInput));
+        localDispatch({ type: 'CLOSE_ADD_MODAL' });
+      }catch(error){
+        console.error('Redux-saga with add goal Error:', error.data.message);
+      }
+    }
   };
 
-  const handleEditGoal = () => {
-    dispatch(editGoal({ id: state.editId, title: state.editTitle }));
-    localDispatch({ type: 'CLOSE_EDIT_MODAL' });
+  const handleShowGoals = async () => {
+    if (Config.ENV === 'Staging') {
+      console.log('attempting show goal using RTK query')
+      try {
+        const result = await rtkGetGoal();
+        console.log('show goal success:', result.data.message);
+        dispatch(fetchGoalsSuccess(result.data.data))
+      } catch (error) {
+        console.error('RTK Query show goal Error:', error.message);
+        dispatch(fetchGoalsFailed(error.message))
+      }
+    } else if(Config.ENV === 'Development'){
+      try{
+        console.log('attempting show goals using redux-saga with axios')
+        dispatch(fetchGoals())
+      }catch(error){
+        console.error('Redux-saga with axios show goals Error:', error.data.message);
+      }
+    }
+  }
+
+  const handleEditGoal = async () => {
+    if (Config.ENV === 'Staging') {
+      console.log('attempting edit goal using RTK query')
+      try {
+        const result = await rtkEditGoal({ id: state.editId, title: state.editTitle }).unwrap();
+        console.log('edit goal success:', result);
+        dispatch(editGoalSuccess(result.updatedGoal))
+        localDispatch({ type: 'CLOSE_EDIT_MODAL' });
+      } catch (error){
+        console.error('RTK Query edit goal Error:', error.message);
+        dispatch(editGoalFailed(error.message))
+      }
+    } else if(Config.ENV === 'Development'){
+      try{
+        console.log('attempting edit goal using redux-saga with axios')
+        dispatch(editGoal({ id: state.editId, title: state.editTitle }));
+        localDispatch({ type: 'CLOSE_EDIT_MODAL' });
+      }catch(error){
+        console.error('Redux-saga with edit goal Error:', error.data.message);
+      }
+    }
   };
+
+  const handleDeleteGoals = async (id) => {
+    if (Config.ENV === 'Staging') {
+      console.log('attempting delete goal using RTK query')
+      try {
+        const result = await rtkDeleteGoal(id);
+        console.log('delete goal success:', result);
+        dispatch(deleteGoalSuccess(result.data.deletedGoal))
+      } catch (error) {
+        console.error('RTK Query delete goal Error:', error.message);
+        dispatch(deleteGoalFailed(error.message))
+      }
+    } else if(Config.ENV === 'Development'){
+      try{
+        console.log('attempting delete goals using redux-saga with axios')
+        dispatch(deleteGoal(id))
+      }catch(error){
+        console.error('Redux-saga with axios delete goals Error:', error.data.message);
+      }
+    }
+  }
+
 
   const renderGoals = ({ item }) => (
     <ListItem
@@ -31,7 +116,7 @@ const GoalsScreen = () => {
       createDt={item.createdAt}
       updateDt={item.updatedAt}
       onEdit={() => localDispatch({ type: 'OPEN_EDIT_MODAL', payload: { id: item._id, title: item.title } })}
-      onDelete={() => dispatch(deleteGoal(item._id))}
+      onDelete={() => handleDeleteGoals(item._id)}
     />
   );
 
@@ -41,7 +126,7 @@ const GoalsScreen = () => {
       <View style={styles.contentContainer}>
         <TextDisplay txt={'Goals Screen'} />
         <FormButton title={'Add goal'} onPress={() => localDispatch({ type: 'OPEN_ADD_MODAL' })} />
-        <FormButton title={'Show goals'} onPress={() => dispatch(fetchGoals())} />
+        <FormButton title={'Show goals'} onPress={handleShowGoals} />
         
         {/* Add Goal Modal */}
         <ModalForm

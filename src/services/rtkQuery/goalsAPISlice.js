@@ -33,7 +33,7 @@ export const goalsAPISlice = createApi({
 
 export const {
   useAddGoalMutation,
-  useGetGoalsQuery,
+  useLazyGetGoalsQuery,
   useEditGoalMutation,
   useDeleteGoalMutation,
 } = goalsAPISlice;

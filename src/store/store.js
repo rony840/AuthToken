@@ -5,6 +5,7 @@ import { userSaga } from './sagas/userSaga';
 import goalReducer from './slices/goalSlice';
 import { goalSaga } from './sagas/goalSaga';
 import { userAPISlice } from '../services/rtkQuery/userAPISlice';
+import { goalsAPISlice } from '../services/rtkQuery/goalsAPISlice';
 
 const sagaInstance = createSagaMiddleware();
 
@@ -13,9 +14,10 @@ export const store = configureStore({
     user: userReducer,
     goal: goalReducer,
     [userAPISlice.reducerPath]: userAPISlice.reducer,
+    [goalsAPISlice.reducerPath]: goalsAPISlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(sagaInstance,userAPISlice.middleware)
+    getDefaultMiddleware().concat(sagaInstance, userAPISlice.middleware, goalsAPISlice.middleware)
 });
 
 sagaInstance.run(userSaga);
