@@ -6,6 +6,7 @@ import { Linking, Image, SafeAreaView } from 'react-native';
 import Heading from '../components/Heading';
 import { useSelector } from 'react-redux';
 import GuestScreen from '../screens/GuestScreen';
+import DatabaseScreen from '../screens/DatabaseScreen';
 
 
 export const linking = {
@@ -100,6 +101,22 @@ const MyTabs = () => {
           tabBarIcon: ({ focused }) => (
             <Image
               source={require('../assets/icons/transaction.png')} // Path to your icon
+              style={{
+                width: 25,
+                height: 25,
+                tintColor: focused ? 'black' : 'gray', // Change color based on focus
+              }}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Database"
+        component={DatabaseScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={require('../assets/icons/db.png')} // Path to your icon
               style={{
                 width: 25,
                 height: 25,
