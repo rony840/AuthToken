@@ -2,6 +2,18 @@ import { Alert } from 'react-native';
 import KeychainHelper from '../helpers/TokenHelper';
 import ClientAPI from './ClientAPI'; // Your axios instance
 
+export const loginWithTokenAPI = async (token) =>{
+  try {
+    const response = await ClientAPI.post('/auth/verify-token', { token });
+    const authToken = response.data.authToken;
+    const user = response.data.user;
+    await KeychainHelper.storeToken(authToken);
+    Alert.alert("Login Successful", `Welcome, ${user.name}!`);
+  } catch (error) {
+      Alert.alert("Login Failed", "Invalid or expired token.");
+  }
+}
+
 export const login = async (email, password) => {
   try {
     const response = await ClientAPI.post('/users/login', { email, password });

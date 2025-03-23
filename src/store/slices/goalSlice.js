@@ -55,6 +55,12 @@ const goalSlice = createSlice({
         fetchGoalsSuccess: (state, action) => {
             state.goals = action.payload;
         },
+        resetGoalStates: (state) => {
+            state.goal = {id: "", title: ""};
+            state.goals = [];
+            state.loading = false;
+            state.error = null;
+        },
         startLoading: (state) => {
             state.loading = true;
         },
@@ -80,6 +86,7 @@ export const {
     fetchGoals,
     fetchGoalsFailed,
     fetchGoalsSuccess,
+    resetGoalStates,
     startLoading, 
     stopLoading, 
     setError 

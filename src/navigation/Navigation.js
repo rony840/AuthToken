@@ -2,10 +2,35 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Logout, Login, Signup, Profile, Goals, Apollo} from '../screens/Screens';
-import { Image, SafeAreaView } from 'react-native';
+import { Linking, Image, SafeAreaView } from 'react-native';
 import Heading from '../components/Heading';
 import { useSelector } from 'react-redux';
 import GuestScreen from '../screens/GuestScreen';
+
+
+export const linking = {
+  prefixes: ['myapp://', 'https://myapp.com'],
+  config: {
+    screens: {
+      Login: 'login',
+      Profile: 'profile',
+      User: {
+        screens: {
+          Goals: 'goals',
+        },
+      },
+    },
+  },
+  getInitialURL: async () => {
+    const url = await Linking.getInitialURL();
+    console.log("url in nav: ",url)
+    return url;
+  },
+  subscribe: (listener) => {
+    const subscription = Linking.addEventListener('url', ({ url }) => listener(url));
+    return () => subscription.remove();
+  },
+};
 
 
 const Stack = createNativeStackNavigator();

@@ -1,5 +1,5 @@
 import { StyleSheet, SafeAreaView, View, FlatList } from 'react-native';
-import { useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import TextDisplay from '../components/TextDisplay';
 import Background from '../components/Background';
@@ -10,6 +10,7 @@ import { addGoal, addGoalFailed, addGoalSuccess, deleteGoal, deleteGoalFailed, d
 import { goalsReducer, initialState } from '../store/reducers/goalsReducer'; // Import reducer
 import Config from 'react-native-config';
 import { useAddGoalMutation, useLazyGetGoalsQuery, useEditGoalMutation, useDeleteGoalMutation } from '../services/rtkQuery/goalsAPISlice';
+import { useRoute, useNavigation } from '@react-navigation/native';
 
 const GoalsScreen = () => {
   const dispatch = useDispatch();
@@ -19,6 +20,16 @@ const GoalsScreen = () => {
   const [rtkGetGoal, { isLoading }] = useLazyGetGoalsQuery();
   const [rtkEditGoal] = useEditGoalMutation();
   const [rtkDeleteGoal] = useDeleteGoalMutation();
+  const route = useRoute();
+  const navigation = useNavigation();
+  console.log(goals)
+
+  useEffect(() => {
+    if (route.params?.deepLinked) {
+      navigation.setParams({ deepLinked: false });
+      dispatch(fetchGoals());
+    }
+  }, [route.params]);
 
   const handleAddGoal = async () => {
     if (Config.ENV === 'Staging') {
@@ -51,8 +62,8 @@ const GoalsScreen = () => {
         console.log('show goal success:', result.data.message);
         dispatch(fetchGoalsSuccess(result.data.data))
       } catch (error) {
-        console.error('RTK Query show goal Error:', error.message);
-        dispatch(fetchGoalsFailed(error.message))
+        console.error('RTK Query show goal Error:', error);
+        dispatch(fetchGoalsFailed(error))
       }
     } else if(Config.ENV === 'Development'){
       try{

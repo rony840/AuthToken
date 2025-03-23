@@ -3,9 +3,12 @@ import { logoutUserSuccess, logoutUserFailed,
     startLoading, stopLoading, setError,
     loginUserFailed, loginUserSuccess,
     signupUserFailed, signupUserSuccess,
-    fetchUserSuccess, fetchUserFailed
+    fetchUserSuccess, fetchUserFailed,
+    loginWithTokenSuccess,
+    loginWithTokenFailed
 } from "../slices/userSlice";
-import { login, signup, getUserInfo, logout } from "../../services/UserAPI";
+import { login, signup, getUserInfo, logout, loginWithTokenAPI } from "../../services/UserAPI";
+import { resetGoalStates } from "../slices/goalSlice";
 
 function* loginUserSaga(action) {
     try {
@@ -17,6 +20,21 @@ function* loginUserSaga(action) {
         console.error('Login error:', error);
         yield put(loginUserFailed());
         yield put(setError(error.message || 'An error occurred during login. Please try again.'));
+    } finally {
+        yield put(stopLoading());
+    }
+}
+
+function* loginWithTokenSaga(action) {
+    try {
+        yield put(startLoading());
+        const response = yield call(loginWithTokenAPI, action.payload);
+        yield put(loginWithTokenSuccess(response));
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        yield put(loginWithTokenFailed());
+        yield put(setError(error.message || 'An error occurred during login with token.'));
     } finally {
         yield put(stopLoading());
     }
@@ -55,6 +73,7 @@ function* signupUserSaga(action) {
 function* logoutUserSaga() {
     try {
       yield call(logout);
+      yield put(resetGoalStates());
       yield put(logoutUserSuccess());
     } catch (error) {
       console.error("Logout error:", error);
@@ -68,4 +87,5 @@ export function* userSaga() {
   yield takeLatest('user/signupUser', signupUserSaga);
   yield takeLatest('user/fetchUser', fetchUserSaga);
   yield takeLatest('user/logoutUser', logoutUserSaga);
+  yield takeLatest('user/loginWithToken', loginWithTokenSaga);
 }

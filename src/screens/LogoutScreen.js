@@ -1,10 +1,11 @@
-import { StyleSheet, SafeAreaView, View, Alert } from 'react-native';
+import { StyleSheet, SafeAreaView, View, Alert, Linking } from 'react-native';
 import { Background, TextDisplay, FormButton } from '../components/Components';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { logoutUser, logoutUserFailed, logoutUserSuccess } from '../store/slices/userSlice';
 import Config from 'react-native-config';
 import { useLogoutMutation } from '../services/rtkQuery/userAPISlice';
+import { resetGoalStates } from '../store/slices/goalSlice';
 
 const LogoutScreen = () => {
   const navigation = useNavigation();
@@ -16,9 +17,12 @@ const LogoutScreen = () => {
         console.log('attempting login using RTK query')
         try {
           const result = await logout();
+          
           console.log('Logout successful:', result.data);
           Alert.alert('Logged Out!',result.data)
-          dispatch(logoutUserSuccess(result))
+          Linking.getInitialURL = async () => null;
+          dispatch(resetGoalStates());
+          dispatch(logoutUserSuccess(result));
         } catch (error) {
           console.error('RTK Query Logout Error:', error.data.message);
           dispatch(logoutUserFailed(error.data.message))
@@ -31,6 +35,7 @@ const LogoutScreen = () => {
           console.error('Redux-saga with axios logout Error:', error.data.message);
         }
       }
+      
   };
 
   return (

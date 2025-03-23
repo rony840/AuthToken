@@ -8,7 +8,7 @@
 import React from 'react';
 import { SafeAreaView, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import AppNavigation from './src/navigation/Navigation';
+import AppNavigation, { linking } from './src/navigation/Navigation';
 import { Provider } from 'react-redux';
 import { store } from './src/store/store';
 import { ApolloProvider,ApolloClient,InMemoryCache } from '@apollo/client';
@@ -19,11 +19,11 @@ function App(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.container}>
       <ApolloProvider client={graphqlClient}>
-      <Provider store={store}>
-      <NavigationContainer>
-      <AppNavigation/>
-       </NavigationContainer>
-      </Provider>
+        <Provider store={store}>
+          <NavigationContainer linking={linking}>
+            <AppNavigation/>
+          </NavigationContainer>
+        </Provider>
       </ApolloProvider>
     </SafeAreaView>
   );

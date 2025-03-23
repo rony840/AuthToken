@@ -39,6 +39,19 @@ const userSlice = createSlice({
             state.loggedin = true;
             state.isAuthenticated= true;
         },
+        loginWithToken: (state, action) => {
+            console.log('deep link token inside slice: ',action.payload)
+            state.user = action.payload;
+        },
+        loginWithTokenFailed: (state, action) => {
+            state.authUser = action.payload;
+            state.loggedin = false;
+        },
+        loginWithTokenSuccess: (state, action) => {
+            state.currentUser = action.payload;
+            state.loggedin = true;
+            state.isAuthenticated= true;
+        },
         fetchUser: (state, action) => {
             state.user = action.payload;
         },
@@ -89,6 +102,9 @@ export const {
     loginUser,
     loginUserFailed,
     loginUserSuccess,
+    loginWithToken,
+    loginWithTokenFailed,
+    loginWithTokenSuccess,
     fetchUser,
     fetchUserSuccess,
     fetchUserFailed,

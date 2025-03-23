@@ -1,4 +1,4 @@
-import { StyleSheet, SafeAreaView, View, ActivityIndicator} from 'react-native';
+import { StyleSheet, SafeAreaView, View, ActivityIndicator, Linking} from 'react-native';
 import { Background, FormButton } from '../components/Components';
 import { useDispatch, useSelector } from 'react-redux';
 import TextDisplay from '../components/TextDisplay';
@@ -6,11 +6,23 @@ import { fetchUser, fetchUserFailed, fetchUserSuccess } from '../store/slices/us
 import Config from 'react-native-config';
 import { useLazyGetUserInfoQuery } from '../services/rtkQuery/userAPISlice';
 import { useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
 
 const Profile = () => {
   const dispatch = useDispatch(); 
   const {currentUser} = useSelector((state) => state.user);
   const [getUserInfo,  {isLoading, isFetching, status, error} ] = useLazyGetUserInfoQuery();
+  const navigation = useNavigation();
+  
+  useEffect(() => {
+      const navigateIfNeeded = async () => {
+          const url = await Linking.getInitialURL();
+          if (url && url.includes("redirect=goals")) {
+            navigation.navigate("Goals", { deepLinked: true });
+          }
+      };
+      navigateIfNeeded();
+    }, []);
 
   const fetchUserInfo = async() => {
     if (Config.ENV === 'Staging') {
