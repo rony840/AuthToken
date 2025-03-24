@@ -1,49 +1,56 @@
-import { StyleSheet, SafeAreaView, View, FlatList } from 'react-native';
+import { StyleSheet, SafeAreaView, View, FlatList, Alert } from 'react-native';
 import TextDisplay from '../components/TextDisplay';
 import Background from '../components/Background';
 import ModalForm from '../components/ModalForm';
 import FormButton from '../components/FormButton';
 import { goalsReducer, initialState } from '../store/reducers/goalsReducer';
-import { database } from '../database/watermelonDB';
-import { useReducer, useState } from 'react';
-import ListItem from '../components/ListItem';
+import { useReducer } from 'react';
+import { useTaskStore } from '../store/taskStore';
+import TaskListItem from '../components/TaskList';
 
 const DatabaseScreen = () => {
   const [state, localDispatch] = useReducer(goalsReducer, initialState);
-  const [tasks, setTasks] = useState([])
+  const { fetchTasks, tasks, updateTaskName, addTask, updateTask, deleteTask } = useTaskStore();
+
   const showTasks = async () => {
-    const taskList = await database.get("tasks").query().fetch();
-    console.log("tasklist: ",taskList)
-    setTasks(taskList)
+    fetchTasks()
   }
-  console.log(tasks);
 
   const handleAddTask = async (taskName) => {
     try{
-      console.log('attempting to add: ',taskName)
-      await database.write( async () => {
-        console.log('inside writer')
-        const newTask = await database.get('tasks').create(task => {
-          task.name = taskName
-        })
-        console.log('res: ',newTask)
-    })
-    localDispatch({ type: 'CLOSE_ADD_MODAL' })
+      await addTask(taskName);
+      Alert.alert('Task Added!',`"${taskName}" successfully added`)
+      localDispatch({ type: 'CLOSE_ADD_MODAL' })
     }catch(error){
       console.log('failed to add task: ',error)
-    }
-    
+  } 
+}
+const handleEditTask = async () => {
+  try{
+    await updateTaskName(state.editId, state.editTitle);;
+    Alert.alert('Task Edited!',`"${state.editTitle}" successfully edited`)
+    localDispatch({ type: 'CLOSE_EDIT_MODAL' })
+  }catch(error){
+    console.log('failed to edit task: ',error)
+  }
 }
 
-const renderTasks = ({ item }) => (
-  <ListItem
-    id={item._id}
-    title={item.name}
-    updateDt={item.isCompleted}
-    onEdit={() => localDispatch({ type: 'OPEN_EDIT_MODAL', payload: { id: item._id, title: item.title } })}
-    onDelete={() => {}}
-  />
-);
+const renderTasks = ({ item }) => {
+  console.log(item.id)
+  return(<TaskListItem
+    id={item.id}
+    name={item.name}
+    onEdit={(item) => localDispatch({ type: 'OPEN_EDIT_MODAL', payload: { id: item.id, title: item.name } })}
+    onUpdate={(item)=> updateTask(item)}
+    onDelete={(item) => deleteTask(item)}
+    item={item}
+    isCompleted={item.isCompleted}
+  />)
+}
+  
+ 
+
+
   return (
     <SafeAreaView style={styles.container}>
       <Background />
@@ -52,35 +59,34 @@ const renderTasks = ({ item }) => (
         <FormButton title={'Add task'} onPress={() => localDispatch({ type: 'OPEN_ADD_MODAL' })} />
         <FormButton title={'Show tasks'} onPress={showTasks} />
         
-        {/* Add Task Modal */}
         <ModalForm
           onChange={(text) => localDispatch({ type: 'SET_GOAL_INPUT', payload: text })}
           onClose={() => localDispatch({ type: 'CLOSE_ADD_MODAL' })}
           onSubmit={()=>{handleAddTask(state.goalInput)}}
-          title={'Add Goal'}
-          placeholder={'Write a goal'}
+          title={'Add Task'}
+          placeholder={'Write a task'}
           modalVisible={state.isAddModalOpen}
         />
 
         <View style={styles.bodyContainer}>
           <FlatList
             data={tasks}
-            keyExtractor={(item) => item._id}
+            keyExtractor={(item,index) => item?.id?.toString() || `task-${index}`}
             renderItem={renderTasks}
-            contentContainerStyle={styles.flatListContainer}
           />
         </View>
-
         {/* Edit task Modal */}
         <ModalForm
           onChange={(text) => localDispatch({ type: 'SET_EDIT_TITLE', payload: text })}
           onClose={() => localDispatch({ type: 'CLOSE_EDIT_MODAL' })}
-          onSubmit={()=>{}}
-          title={'Edit Goal'}
-          placeholder={'Edit your goal'}
+          onSubmit={handleEditTask}
+          title={'Edit Task'}
+          placeholder={'Edit your task'}
           initValue={state.editTitle}
           modalVisible={state.isEditModalOpen}
         />
+
+        
       </View>
     </SafeAreaView>
   );
@@ -96,6 +102,7 @@ const styles = StyleSheet.create({
     marginTop: '2%',
     justifyContent: 'center',
     alignItems: 'center',
+    width:'100%',
   },
   contentContainer: {
     position: 'absolute',

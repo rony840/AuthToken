@@ -100,7 +100,7 @@ const MyTabs = () => {
         options={{
           tabBarIcon: ({ focused }) => (
             <Image
-              source={require('../assets/icons/transaction.png')} // Path to your icon
+              source={require('../assets/icons/goals.png')} // Path to your icon
               style={{
                 width: 25,
                 height: 25,

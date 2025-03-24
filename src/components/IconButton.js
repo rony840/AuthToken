@@ -1,14 +1,12 @@
 import { StyleSheet, Image, Pressable } from "react-native";
-import Colors from "../assets/colors/Colors"; // Assuming you have a colors file for transparency
+import Colors from "../assets/colors/Colors"; 
 
-// Create a dictionary for icon paths
 const iconPaths = {
   profile: require("../assets/icons/profile.png"),
-  // Add more icons as needed
 };
 
 const IconButton = ({ type, onPress, opacity = true }) => {
-  // Get the icon path from the dictionary, or fallback to a default icon if not found
+  
   const iconSource = iconPaths[type] || require("../assets/icons/profile.png");
 
   return (
